@@ -1,0 +1,22 @@
+- name: Check if pihole is installed
+  stat:
+    path: /opt/pihole
+  register: pihole_installed
+
+- block:
+  - name: Get bash install script
+    get_url:
+      url: https://install.pi-hole.net
+      dest: "/home/admin/pihole-basic-install.sh"
+      mode: 0755
+
+  #TODO: make unattended
+  - name: Run Pi-hole installer
+    shell: "/home/admin/pihole-basic-install.sh"
+    become: yes
+
+  when: pihole_installed.stat.isdir is undefined
+
+- name: Run pihole update command
+  shell: pihole -up
+  when: pihole_installed.stat.isdir is defined
